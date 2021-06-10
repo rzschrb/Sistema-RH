@@ -1,2 +1,0 @@
-pip install PySide6
-pip install cx_freeze
