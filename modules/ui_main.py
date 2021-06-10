@@ -1934,7 +1934,7 @@ class Ui_MainWindow(object):
         self.irrfLabelD.setText(QCoreApplication.translate("MainWindow", u"Taxa IRRF:", None))
         self.label_57.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt; font-weight:700;\">Informa\u00e7\u00f5es do Funcion\u00e1rio</span></p></body></html>", None))
         self.bonusLabelD.setText(QCoreApplication.translate("MainWindow", u"B\u00f4nus:", None))
-        self.label_59.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt; font-weight:700;\">Meses trabalhados esse ano (at\u00e9 outubro):</span></p></body></html>", None))
+        self.label_59.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:12pt; font-weight:700;\">Meses trabalhados esse ano:</span></p></body></html>", None))
         self.bonusCheckD.setText("")
         self.inssLabelD.setText(QCoreApplication.translate("MainWindow", u"Taxa INSS:", None))
         self.cargoLabelD.setText(QCoreApplication.translate("MainWindow", u"Cargo:", None))
