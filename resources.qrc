@@ -1,0 +1,37 @@
+<RCC>
+  <qresource prefix="images">
+    <file>images/images/logobranca.png</file>
+    <file>images/images/logopreta.png</file>
+  </qresource>
+  <qresource prefix="icons">
+    <file>images/icons/cil-account-logout.png</file>
+    <file>images/icons/cil-arrow-bottom.png</file>
+    <file>images/icons/cil-arrow-bottom-2.png</file>
+    <file>images/icons/cil-chart.png</file>
+    <file>images/icons/cil-chart-line.png</file>
+    <file>images/icons/cil-chart-pie.png</file>
+    <file>images/icons/cil-check.png</file>
+    <file>images/icons/cil-check-alt.png</file>
+    <file>images/icons/cil-check-circle.png</file>
+    <file>images/icons/cil-description.png</file>
+    <file>images/icons/cil-envelope-closed.png</file>
+    <file>images/icons/cil-envelope-letter.png</file>
+    <file>images/icons/cil-envelope-open.png</file>
+    <file>images/icons/cil-equalizer.png</file>
+    <file>images/icons/cil-home.png</file>
+    <file>images/icons/cil-layers.png</file>
+    <file>images/icons/cil-map.png</file>
+    <file>images/icons/cil-notes.png</file>
+    <file>images/icons/cil-print.png</file>
+    <file>images/icons/cil-share.png</file>
+    <file>images/icons/cil-share-boxed.png</file>
+    <file>images/icons/cil-x.png</file>
+    <file>images/icons/cil-x-circle.png</file>
+    <file>images/icons/icon_close.png</file>
+    <file>images/icons/icon_maximize.png</file>
+    <file>images/icons/icon_menu.png</file>
+    <file>images/icons/icon_minimize.png</file>
+    <file>images/icons/icon_restore.png</file>
+    <file>images/icons/icon_settings.png</file>
+  </qresource>
+</RCC>

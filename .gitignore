@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Others
+.pyc
+.qt_for_python/
+qt_for_python/
+*.ui
+.ui
