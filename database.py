@@ -27,7 +27,7 @@ def _validateRHTable():
         print("Tabela 'SistemaRH' não existe. Criando tabela e inserindo dados default.")
         _createRHTable()
         insertData = QSqlQuery()
-        insertData.exec_("""INSERT INTO sistemarh (name, setor, salary, email) VALUES ('admin', 'Gerente', 10000, 'admin@example.com')""")
+        insertData.exec_("""INSERT INTO sistemarh (name, setor, salary, email, chave) VALUES ('admin', 'Gerente', 10000, '7y8ovvy5vm400a67g1', '819/915/499/138')""")
 
 
 def _createRHTable():
@@ -40,7 +40,8 @@ def _createRHTable():
             name VARCHAR(40) NOT NULL,
             setor VARCHAR(50) NOT NULL,
             salary INTEGER NOT NULL,
-            email VARCHAR(40) NOT NULL
+            email VARCHAR(40) NOT NULL,
+            chave VARCHAR(40)
         )
         """
     )

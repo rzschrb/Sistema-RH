@@ -1,6 +1,7 @@
 # MAIN FILE
 # ///////////////////////////////////////////////////////////////
 from main import *
+import random
 
 # WITH ACCESS TO MAIN WINDOW WIDGETS
 # ///////////////////////////////////////////////////////////////
@@ -14,6 +15,10 @@ class AppFunctions(MainWindow):
         insertData = QSqlQuery()
         insertData.exec_(f"""INSERT INTO sistemarh (name, setor, salary, email) VALUES ('{name}', '{setor}', {salary}, '{email}')""")
 
+    def addChave(email, key):
+        insertData = QSqlQuery()
+        insertData.exec_(f"""UPDATE sistemarh SET chave = '{key}' WHERE email = '{email}'""")
+
     def remFuncionario(id):
         removeData = QSqlQuery()
         removeData.exec_(f"""DELETE FROM sistemarh WHERE id = {id}""")
@@ -22,19 +27,25 @@ class AppFunctions(MainWindow):
     # RELOAD TABLE
     ################################################################
 
-    def reloadTable(self):
+    def reloadTable(self): # adicionar decriptografia
         self.ui.tableWidget.clearContents()
         self.ui.tableWidget.setRowCount(0)
-        query = QSqlQuery("SELECT id, name, setor, salary, email FROM sistemarh")
+        query = QSqlQuery("SELECT id, name, setor, salary, email, chave FROM sistemarh")
         while query.next():
-            print(query.value(0), query.value(1), query.value(2), query.value(3), query.value(4))
             rows = self.ui.tableWidget.rowCount()
             self.ui.tableWidget.setRowCount(rows + 1)
             self.ui.tableWidget.setItem(rows, 0, QTableWidgetItem(str(query.value(0))))
             self.ui.tableWidget.setItem(rows, 1, QTableWidgetItem(query.value(1)))
             self.ui.tableWidget.setItem(rows, 2, QTableWidgetItem(query.value(2)))
             self.ui.tableWidget.setItem(rows, 3, QTableWidgetItem(f'R$ {(query.value(3))}'))
-            self.ui.tableWidget.setItem(rows, 4, QTableWidgetItem(query.value(4)))
+            tuple_email_chave = (query.value(4), query.value(5))
+            emailQuery = AppFunctions.decodificar_dados(tuple_email_chave)
+            emailValue, *chaveValue = emailQuery
+            if emailValue[-1] == 'z':
+                emailValueN = emailValue.replace(emailValue[-1], '')
+                self.ui.tableWidget.setItem(rows, 4, QTableWidgetItem(emailValueN))
+            else:
+                self.ui.tableWidget.setItem(rows, 4, QTableWidgetItem(emailValue))
         self.ui.tableWidget.setRowCount(rows + 5)
 
     ################################################################
@@ -289,6 +300,106 @@ class AppFunctions(MainWindow):
 
         finalSalary = priParc + segParc
         self.ui.finalLabelD.setText(f"<b><big>Férias Líquida: R$ {finalSalary:.2f}</big></b>")
+
+    ################################################################
+    # Encriptação
+    ################################################################
+
+    alfabeto = {'z':0,'a':1,'b':2,'c':3,'d':4,'e':5,'f':6,'g':7,'h':8,'i':9,'j':10,'k':11,'l':12,'m':13,'n':14,'o':15,'p':16,'q':17,'r':18,'s':19,'t':20,'u':21,'v':22,'w':23,'x':24,'y':25,'0':26,'1':27,'2':28,'3':29,'4':30,'5':31,'6':32,'7':33,'8':34,'9':35,'@':36,'.':37}
+    inversos_modulares = {}
+    for n in range(len(alfabeto)):
+        for m in range(len(alfabeto)):
+            if (n*m)%len(alfabeto) == 1: inversos_modulares[n] = m
+
+    # Recupera a chave de um valor dentro do dicionario acima
+    def get_key(val):
+        for key, value in AppFunctions.alfabeto.items():
+            if val == value:
+                return key
+    
+    def determinante_matriz(chave = [[1, 0], [0, 1]]):
+        return (chave[0][0] * chave[1][1] - chave[0][1] * chave[1][0])%len(AppFunctions.alfabeto)
+
+    def gerar_chave():
+        chave = [[],[]]
+
+        # Gera uma chave aleatória com elementos inteiros de 1 a 1000 invertível mod36
+        while True:                               #gera uma chave aleatória com elementos inteiros de
+            for i in range(2):                    #1 a 1000 invertível mod36
+                chave[0].append(random.randint(1, 1000))
+            for i in range(2):
+                chave[1].append(random.randint(1, 1000))
+
+            determinante_chave = AppFunctions.determinante_matriz(chave)
+            if determinante_chave < 0:
+                determinante_chave = determinante_chave*(-1)
+            if determinante_chave%len(AppFunctions.alfabeto) not in AppFunctions.inversos_modulares:
+                chave.clear()
+                chave = [[],[]]
+            else:break
+        return chave
+    
+    # faz a encriptação da mensagem segundo a cifra de hill, guardando num banco de dados a email codificada e a chave
+    def encriptação(email, chave):
+        # matrizes
+        matriz_email = []
+        matriz_linha = []
+        coluna = []
+        email_linha = ''
+        x = 0
+
+        for char in email:
+            coluna.append(AppFunctions.alfabeto[char])
+            if len(coluna) == 2:
+                matriz_email.append(coluna.copy())
+                coluna.clear()
+        # correção da matriz
+        if len(coluna)>0:
+            matriz_email.append([AppFunctions.alfabeto[email[-1]],0])
+            coluna.clear()
+    
+        while len(matriz_linha) < len(matriz_email): #multiplicação das matrizes
+            for n_coluna in matriz_email:
+                coluna.append(chave[0][0]*n_coluna[0]+chave[0][1]*n_coluna[1])
+                coluna.append(chave[1][0]*n_coluna[0]+chave[1][1]*n_coluna[1])
+                matriz_linha.append(coluna.copy())
+                coluna.clear()
+
+        #matriz codificada mod36
+        for j in matriz_linha:
+            for i in range(len(j)):
+                j[i] = j[i]%len(AppFunctions.alfabeto)
+
+
+        #email_linha
+        for colunas in matriz_linha:
+            email_linha += AppFunctions.get_key(colunas[0])
+            email_linha += AppFunctions.get_key(colunas[1])
+        chaveString = str(chave[0][0]) + '/' + str(chave[0][1]) + '/' + str(chave[1][0]) + '/' + str(chave[1][1])
+        return (email_linha,chaveString)
+
+    def decodificar_dados(tupla_email_chave): # tupla = (email, chave)
+        chave = tupla_email_chave[1]
+        chave_inversa = []
+        c = []
+        bar = 0
+        while chave.find('/',bar) != -1:
+            c.append(int(chave[bar:chave.find('/',bar)]))
+            bar = chave.find('/', bar) + 1
+            if len(c) == 2:
+                chave_inversa.append(c.copy())
+                c.clear()
+        # aqui se obtem a matriz inversa da chave(modlen(alfabeto))
+        c.append(int(chave[bar:]))
+        chave_inversa.append(c.copy())
+        determinante_chave = AppFunctions.inversos_modulares[AppFunctions.determinante_matriz(chave_inversa)]
+        temp = chave_inversa[0][0]
+        chave_inversa[0][0] = chave_inversa[1][1] * determinante_chave
+        chave_inversa[0][1] = -chave_inversa[0][1] * determinante_chave
+        chave_inversa[1][0] = -chave_inversa[1][0] * determinante_chave
+        chave_inversa[1][1] = temp * determinante_chave
+        dados_obtidos = AppFunctions.encriptação(tupla_email_chave[0], chave_inversa)
+        return dados_obtidos 
 
     ################################################################
     # Validações

@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
         widgets.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         widgets.tableWidget.setHorizontalHeaderLabels(['ID', 'Nome', 'Setor', 'Salario', 'Email'])
         createConnection('database.db')
-        query = QSqlQuery("SELECT id, name, setor, salary, email FROM sistemarh")
+        query = QSqlQuery("SELECT id, name, setor, salary, email, chave FROM sistemarh") # Adicionar decriptografia
         while query.next():
             rows = widgets.tableWidget.rowCount()
             widgets.tableWidget.setRowCount(rows + 1)
@@ -64,7 +64,14 @@ class MainWindow(QMainWindow):
             widgets.tableWidget.setItem(rows, 1, QTableWidgetItem(query.value(1)))
             widgets.tableWidget.setItem(rows, 2, QTableWidgetItem(query.value(2)))
             widgets.tableWidget.setItem(rows, 3, QTableWidgetItem(f'R$ {(query.value(3))}'))
-            widgets.tableWidget.setItem(rows, 4, QTableWidgetItem(query.value(4)))
+            tuple_email_chave = (query.value(4), query.value(5))
+            emailQuery = AppFunctions.decodificar_dados(tuple_email_chave)
+            emailValue, *chaveValue = emailQuery
+            if emailValue[-1] == 'z':
+                emailValueN = emailValue.replace(emailValue[-1], '')
+                self.ui.tableWidget.setItem(rows, 4, QTableWidgetItem(emailValueN))
+            else:
+                self.ui.tableWidget.setItem(rows, 4, QTableWidgetItem(emailValue))
         widgets.tableWidget.setRowCount(rows + 5)
         widgets.tableWidget.resizeColumnsToContents()
         
@@ -173,7 +180,11 @@ class MainWindow(QMainWindow):
                     if (AppFunctions.stringTest(valueSetor)):
                         if(AppFunctions.valueTest(valueSalary)):
                             if(AppFunctions.emailTest(valueEmail)):
-                                AppFunctions.addFuncionario(valueName, valueSetor, valueSalary, valueEmail.lower())
+                                genchave = AppFunctions.gerar_chave()
+                                emailtuple = AppFunctions.encriptação(valueEmail, genchave)
+                                emailencripto, chaves = emailtuple
+                                AppFunctions.addFuncionario(valueName, valueSetor, valueSalary, emailencripto)
+                                AppFunctions.addChave(emailencripto, chaves)
                                 AppFunctions.reloadTable(self)
                                 return widgets.resultAdd.setText("Sucesso!")
                             else:
